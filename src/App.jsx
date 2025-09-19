@@ -7,6 +7,8 @@ import { useState } from "react";
  * Produkty kupione powinny być stylizowane inaczej niż te, które nadal są do kupienia.
  */
 
+// Test czy mam dostęp z domu
+
 function App() {
   const [newProdukt, setNewProdukt] = useState("");
   const [shoppingCart, setShoppingCart] = useState([]);
