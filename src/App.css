@@ -1,0 +1,45 @@
+html {
+    background-color: rgb(193, 239, 211);
+}
+
+.shoppingCart {
+    border: 3px solid black;
+    margin: 3px;
+    padding: 10px;
+    background-color: aquamarine;
+}
+
+.produkt {
+    background-color: rgb(151, 223, 151);
+    padding: 10px;
+    border: 2px solid black;
+    margin: 3px;
+}
+
+.produktTitle {
+    padding: 0px;
+    border: 3px solid rgb(135, 216, 117);
+}
+
+.name {
+    font-size: 25px;
+    margin: 10px;
+}
+
+.produktButtons {
+    margin: 10px;
+}
+
+.addProdukt {
+    margin: 10px;
+    padding: 10px;
+    border: 2px solid black;
+    background-color: rgb(151, 223, 151);
+    box-shadow: 0 0 10px 1px black;
+}
+
+.message {
+    display: inline;
+    margin-left: 10px;
+    color: rgb(211, 69, 69);
+}
