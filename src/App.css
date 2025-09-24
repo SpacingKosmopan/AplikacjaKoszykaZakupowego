@@ -43,3 +43,7 @@ html {
     margin-left: 10px;
     color: rgb(211, 69, 69);
 }
+
+button {
+    margin-left: 20px;
+}

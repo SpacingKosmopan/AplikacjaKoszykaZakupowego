@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /* CEL:
  * Stworzenie prostej aplikacji, która pozwala użytkownikowi dodawać produkty do koszyka,
@@ -7,16 +7,27 @@ import { useState } from "react";
  * Produkty kupione powinny być stylizowane inaczej niż te, które nadal są do kupienia.
  * 
  * TO DO:
- * 1. Motywy - ciemny i jasny
- * 2. Edytowanie nazwy produktu
- * 3. Sortowanie produktów - kupione na koniec listy 
+ * 
  */
 
 function App() {
   // zmienne stanu
   const [newProdukt, setNewProdukt] = useState("");
-  const [shoppingCart, setShoppingCart] = useState([]);
+  const [shoppingCart, setShoppingCart] = useState(() => {
+    const saved = localStorage.getItem("shoppingCart");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [message, setMessage] = useState("");
+
+  //zapisywanie produktów lokalnie
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem("shoppingCart")) || [];
+    setShoppingCart(savedCart);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("shoppingCart", JSON.stringify(shoppingCart));
+  }, [shoppingCart]);
 
   // wykrycie zmiany w inpucie
   const handleChange = (event) => {
@@ -35,14 +46,18 @@ function App() {
       };
       // dodanie produktu do koszyka
     const newShoppingCart=[...shoppingCart,produkt];
-    // wyczyszczenie inputa i komunikatu
     setShoppingCart(newShoppingCart);
+    // wyczyszczenie inputa i komunikatu
     setMessage("");
+    document.querySelector("input").value = "";
   };
 
   // usunięcie produktu z koszyka
   const deleteProdukt=(id)=>{
-    setShoppingCart(shoppingCart.filter(produkt=>produkt.id!==id))
+    const confirmDelete = window.confirm("Czy jesteś pewien?");
+    if (confirmDelete) {
+      setShoppingCart(shoppingCart.filter((produkt) => produkt.id !== id));
+    }
   }
 
   // zaznaczenie produktu jako kupionego
@@ -69,12 +84,30 @@ function App() {
         </label>
           <button onClick={addProdukt}>Dodaj</button>
           <p className="message">{message}</p>
+          <hr />
+          <p>Ilość produktów: {shoppingCart.length}</p>
       </div>
-    {/* wyświetlenie koszyka */}
+    {/* wyświetlenie koszyka - najpierw do kupienia, na końcu kupione */}
       <div className="shoppingCart">
         {shoppingCart.map((produkt) => {
+          if(produkt.bought) return null;
           return (
-            <Produkt
+            <ProduktItem
+            key={produkt.id}
+            produktName={produkt.produktName}
+            id={produkt.id}
+            bought={produkt.bought}
+            buyProdukt={buyProdukt}
+            deleteProdukt={deleteProdukt}
+            />
+          );
+        }
+        )}
+        {shoppingCart.map((produkt) => {
+          if(!produkt.bought) return null;
+          return (
+            <ProduktItem
+            key={produkt.id}
             produktName={produkt.produktName}
             id={produkt.id}
             bought={produkt.bought}
@@ -90,7 +123,7 @@ function App() {
 }
 
 // komponent produktu
-const Produkt = (props) => {
+const ProduktItem = (props) => {
   return (
     <div className="produkt">
       {/* cały produkt */}
@@ -103,7 +136,7 @@ const Produkt = (props) => {
           {color:
             (props.bought ? "rgb(170, 170, 170)" : "black")
           }
-          }>
+        }>
           {props.produktName}</p>
         </div>
         { /* przyciski akcji */ }
@@ -113,9 +146,7 @@ const Produkt = (props) => {
           (props.bought ? true : false)
           } 
           onClick={
-            ()=>props.buyProdukt(props.id)} 
-            style={{marginLeft:20}
-            }>
+            ()=>props.buyProdukt(props.id)} >
           {props.bought ? "✔ Kupiono" : "🛒 Kup"}
         </button>
       </div>
