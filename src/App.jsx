@@ -6,8 +6,9 @@ import { useEffect, useState } from "react";
  * usuwać je oraz zaznaczać, które produkty zostały kupione.
  * Produkty kupione powinny być stylizowane inaczej niż te, które nadal są do kupienia.
  * 
- * TO DO:
- * 
+ * !!! ! ! ! !!!
+ * Produkty po odświeżeniu, czy zamknięciu okna nie znikają
+ * !!! ! ! ! !!!
  */
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
     setShoppingCart(savedCart);
   }, []);
 
+  //wczytanie produktów z localStorage
   useEffect(() => {
     localStorage.setItem("shoppingCart", JSON.stringify(shoppingCart));
   }, [shoppingCart]);
@@ -37,23 +39,23 @@ function App() {
   // dodanie produktu do koszyka
   const addProdukt = () => {
     // walidacja
-    if(newProdukt==="") { setMessage("Nazwa produktu nie może być pusta!"); return; }
+    if(newProdukt === "") { setMessage("Nazwa produktu nie może być pusta!"); return; }
     // utworzenie obiektu produktu
-    const produkt={
+    const produkt = {
       id:shoppingCart.length === 0 ? 1 : shoppingCart[shoppingCart.length-1].id+1,
-       produktName:newProdukt,
-       bought:false
+        produktName:newProdukt,
+        bought:false
       };
       // dodanie produktu do koszyka
-    const newShoppingCart=[...shoppingCart,produkt];
+    const newShoppingCart=[...shoppingCart, produkt];
     setShoppingCart(newShoppingCart);
     // wyczyszczenie inputa i komunikatu
     setMessage("");
-    document.querySelector("input").value = "";
+    setNewProdukt("");
   };
 
   // usunięcie produktu z koszyka
-  const deleteProdukt=(id)=>{
+  const deleteProdukt = (id) => {
     const confirmDelete = window.confirm("Czy jesteś pewien?");
     if (confirmDelete) {
       setShoppingCart(shoppingCart.filter((produkt) => produkt.id !== id));
@@ -61,12 +63,12 @@ function App() {
   }
 
   // zaznaczenie produktu jako kupionego
-  const buyProdukt=(id)=>{
+  const buyProdukt = (id) => {
     // mapowanie tablicy i zmiana właściwości bought na true dla wybranego produktu
     setShoppingCart(
-      shoppingCart.map((produkt)=>{
-        if(produkt.id===id){
-          return{...produkt,bought:true}
+      shoppingCart.map((produkt) => {
+        if(produkt.id === id){
+          return {...produkt, bought:true}
         } else {
           return produkt;
         }
@@ -80,7 +82,7 @@ function App() {
     {/* dodanie produktu */}
       <div className="addProdukt">
         <label>
-          Wprowadź nazwę produktu: <input onChange={handleChange} />
+          Wprowadź nazwę produktu: <input onChange={handleChange} value={newProdukt}/>
         </label>
           <button onClick={addProdukt}>Dodaj</button>
           <p className="message">{message}</p>
@@ -89,34 +91,19 @@ function App() {
       </div>
     {/* wyświetlenie koszyka - najpierw do kupienia, na końcu kupione */}
       <div className="shoppingCart">
-        {shoppingCart.map((produkt) => {
-          if(produkt.bought) return null;
-          return (
-            <ProduktItem
-            key={produkt.id}
-            produktName={produkt.produktName}
-            id={produkt.id}
-            bought={produkt.bought}
-            buyProdukt={buyProdukt}
-            deleteProdukt={deleteProdukt}
-            />
-          );
-        }
-        )}
-        {shoppingCart.map((produkt) => {
-          if(!produkt.bought) return null;
-          return (
-            <ProduktItem
-            key={produkt.id}
-            produktName={produkt.produktName}
-            id={produkt.id}
-            bought={produkt.bought}
-            buyProdukt={buyProdukt}
-            deleteProdukt={deleteProdukt}
-            />
-          );
-        }
-        )}
+        {
+          shoppingCart.slice() //operacja na kopii
+          .sort((a, b) => a.bought - b.bought) //sortowanie wg bought
+          .map((produkt) => ( //mapowanie i renderowanie
+              <ProduktItem
+              key={produkt.id}
+              produktName={produkt.produktName}
+              id={produkt.id}
+              bought={produkt.bought}
+              buyProdukt={buyProdukt}
+              deleteProdukt={deleteProdukt}
+              />
+          ))}
       </div>
     </>
   );
